@@ -1,2 +1,2 @@
 # VelaPulsar_Spectrum
-C++ FFT 
+Dynamic Spectrum ( in C++)
