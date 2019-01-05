@@ -30,45 +30,49 @@ enum Complex { real, imag };
 
 int main(char* argv[], int argc)								// Spectrogram cpp
 {																										// argv analysis
-	string IN_PATH__, OUT_PATH__;  bool Mode;
+	string IN_PATH__, OUT_PATH__; 
+	bool InpMode, OutMode;
 	float SampleRate;		// in MHz
 	float TimeRes;			// in seconds
 
 	if (string(argv[1]) == "-h" || string(argv[1]) == "--help") {
-		cout << "Format: " + string(argv[0]) + "  <input file PATH> DataMode(BIN/ASCII) <output file PATH> Sample_rate(in MHz) Time_Resolution(in seconds) \n";
+		cout << "Format: " + string(argv[0]) + "  <input file PATH> InpMode(BIN/ASCII) <output file PATH> OutMode(BIN/ASCII) Sample_rate(in MHz) Time_Resolution(in seconds) \n";
 		exit(0);
 	}
 
-	if (argc < 6) {
+	if (argc < 7) {
 		cout << "Too few arguements.................\n ";
-		cout << "Format: " + string(argv[0]) + "  <input file PATH> DataMode(BIN/ASCII) <output file PATH> Sample_rate(in MHz) Time_Resolution(in seconds) \n";
+		cout << "Format: " + string(argv[0]) + "  <input file PATH> InpMode(BIN/ASCII) <output file PATH> OutMode(BIN/ASCII) Sample_rate(in MHz) Time_Resolution(in seconds) \n";
 		exit(-1);
 	}
-	else if (argc == 6) {
+	else if (argc == 7) {
 		IN_PATH__ = string(argv[1]);
 		OUT_PATH__ = string(argv[3]);
 		
-		SampleRate = strtof(argv[4],NULL);
-		TimeRes = strtof(argv[5], NULL);
+		SampleRate = strtof(argv[5],NULL);
+		TimeRes = strtof(argv[6], NULL);
 		
-		if (argv[3] == "ASCII")		Mode = ASCII;
-		else						Mode = BIN;
+		if (argv[3] == "ASCII")		InpMode = ASCII;
+		else						InpMode = BIN;				// default
+
+		if (argv[4] == "ASCII")		OutMode = ASCII;
+		else						OutMode = BIN;				// default
 	}
-	else if (argc > 5) {
+	else if (argc > 7) {
 
 		cout << "Too many arguements.................\n ";
-		cout << "Format: " + string(argv[0]) + "  <input file PATH> DataMode(BIN/ASCII) <output file PATH> Sample_rate(in MHz) Time_Resolution(in seconds) \n";
+		cout << "Format: " + string(argv[0]) + "  <input file PATH> InpMode(BIN/ASCII) <output file PATH> OutMode(BIN/ASCII) Sample_rate(in MHz) Time_Resolution(in seconds) \n";
 		exit(1);
 	}
 	
 
 	ifstream DataIn; 
 
-	DataIn.open(IN_PATH__, ios::in | (Mode ? 0 : ios::binary));											// Opening Data File
+	DataIn.open(IN_PATH__, ios::in | (InpMode ? 0 : ios::binary));											// Opening Data File
 
 	if (!DataIn.is_open()) {
 		cout << " Error Opening the file, please recheck the Input Filepath and Try Again \n";
-		cout << "Format: " + string(argv[0]) + "  <input file PATH> DataMode(BIN/ASCII) <output file PATH> Sample_rate(in MHz) Time_Resolution(in seconds) \n";
+		cout << "Format: " + string(argv[0]) + "  <input file PATH> InpMode(BIN/ASCII) <output file PATH> OutMode(BIN/ASCII) Sample_rate(in MHz) Time_Resolution(in seconds) \n";
 		
 		DataIn.close();
 		exit(2);
@@ -82,7 +86,7 @@ int main(char* argv[], int argc)								// Spectrogram cpp
 
 	if (OutFileTemp.is_open()) {
 		cout << " Output file already exists, please use a different name and Try Again \n";
-		cout << "Format: " + string(argv[0]) + "  <input file PATH> DataMode(BIN/ASCII) <output file PATH> Sample_rate(in MHz) Time_Resolution(in seconds) \n";
+		cout << "Format: " + string(argv[0]) + "  <input file PATH> InpMode(BIN/ASCII) <output file PATH> OutMode(BIN/ASCII) Sample_rate(in MHz) Time_Resolution(in seconds) \n";
 		
 		OutFileTemp.close();
 		exit(3);
@@ -93,7 +97,7 @@ int main(char* argv[], int argc)								// Spectrogram cpp
 
 	if (OutFileTemp.is_open()) {
 		cout << " Output file already exists, please use a different name and Try Again \n";
-		cout << "Format: " + string(argv[0]) + "  <input file PATH> DataMode(BIN/ASCII) <output file PATH> Sample_rate(in MHz) Time_Resolution(in seconds) \n";
+		cout << "Format: " + string(argv[0]) + "  <input file PATH> InpMode(BIN/ASCII) <output file PATH> OutMode(BIN/ASCII) Sample_rate(in MHz) Time_Resolution(in seconds) \n";
 
 		OutFileTemp.close();
 		exit(3);
@@ -104,7 +108,7 @@ int main(char* argv[], int argc)								// Spectrogram cpp
 /*
 	if (!FFT_Ex_OutBin.is_open()) {
 		cout << " Error writting to file, please recheck the Output Filepath and Try Again \n";
-		cout << "Format: " + string(argv[0]) + "  <input file PATH> DataMode(BIN/ASCII) <output file PATH> Sample_rate(in MHz) Time_Resolution(in seconds) \n";
+		cout << "Format: " + string(argv[0]) + "  <input file PATH> InpMode(BIN/ASCII) <output file PATH> OutMode(BIN/ASCII) Sample_rate(in MHz) Time_Resolution(in seconds) \n";
 
 		FFT_Ex_OutBin.close();
 		exit(2);
@@ -134,19 +138,23 @@ int main(char* argv[], int argc)								// Spectrogram cpp
 		int i = 0;
 		while (!DataIn.eof())
 		{
-			if(Mode == ASCII)		Read_Ascii_to_float(Ex, Ey, DataIn, BUFF_Size);
-			else					Read_Bin_to_float(Ex, Ey, DataIn, BUFF_Size);
+			if(InpMode == ASCII)		Read_Ascii_to_float(Ex, Ey, DataIn, BUFF_Size);
+			else						Read_Bin_to_float(Ex, Ey, DataIn, BUFF_Size);
 				
 				fftwf_execute(cfg_x);
-				FFT_Ex_OutBin.open(OUT_PATH__ + FILE_NAME__ + "_Ex_" + to_string(i) + " .bin", ios::out | ios::trunc);	 //| ios::binary);
+				FFT_Ex_OutBin.open(OUT_PATH__ + FILE_NAME__ + "_Ex_" + to_string(i) + " .bin", ios::out | ios::trunc | OutMode ? 0 : ios::binary);
 				FFT_Ex_OutBin.seekp(ios::beg);
-				for (int j = 0; j < BUFF_Size; j++)			 FFT_Ex_OutBin << FFT_Ex[j][real] << "," << FFT_Ex[j][imag] << "\n";
+
+				if (OutMode == ASCII)		for (int j = 0; j < BUFF_Size/2 + 1; j++)			 FFT_Ex_OutBin << FFT_Ex[j][real] << " " << FFT_Ex[j][imag] << "\n";
+				else						FFT_Ex_OutBin.write((char*)FFT_Ex, 2 * sizeof(float)*(BUFF_Size / 2 + 1));
 				FFT_Ex_OutBin.close();
 
 				fftwf_execute(cfg_y);
-				FFT_Ey_OutBin.open(OUT_PATH__ + FILE_NAME__ + "_Ey_" + to_string(i) + " .bin", ios::out | ios::trunc);	 //| ios::binary);
+				FFT_Ey_OutBin.open(OUT_PATH__ + FILE_NAME__ + "_Ey_" + to_string(i) + " .bin", ios::out | ios::trunc | OutMode ? 0 : ios::binary);
 				FFT_Ey_OutBin.seekp(ios::beg);
-				for (int j = 0; j < BUFF_Size; j++)			 FFT_Ey_OutBin << FFT_Ey[j][real] << "," << FFT_Ey[j][imag] << "\n";
+
+				if (OutMode == ASCII)		for (int j = 0; j < BUFF_Size / 2 + 1; j++)			 FFT_Ey_OutBin << FFT_Ey[j][real] << " " << FFT_Ey[j][imag] << "\n";
+				else						FFT_Ey_OutBin.write((char*)FFT_Ey, 2 * sizeof(float)*(BUFF_Size / 2 + 1));
 				FFT_Ey_OutBin.close();
 
 				i++;
