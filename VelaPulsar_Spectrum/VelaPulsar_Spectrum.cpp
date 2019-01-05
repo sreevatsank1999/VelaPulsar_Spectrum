@@ -8,96 +8,103 @@
 #include <stdlib.h>
 #include <sys/types.h>
 #include <math.h>
+
+#include"../lib/fftw-3.3.5-dll64/fftw3.h"
 #include "stdafx.h"
-#include "lib\kiss_fft.h"
-#include "lib\kiss_fftr.h"
 
 using namespace std;
 
-int Ascii_to_Int(int *Ex, int *Ey, ifstream &InpFile, int Buff_Size);
-void Roundto2p(int &BUFF_Size);
+int Read_Ascii_to_float(float *Ex, float *Ey, ifstream &InpFile, int Buff_Size);
+int Read_Bin_to_float(float *Ex, float *Ey, ifstream &InpFile, int Buff_Size);
 
+void Roundto2p(int &BUFF_Size);
+/*
 struct Cpx_Int
 {
 	int r;
 	int i;
 };
-
+*/
+enum DataMode {BIN, ASCII};
+enum Complex { real, imag };
 
 int main(char* argv[], int argc)								// Spectrogram cpp
 {																										// argv analysis
-	string IN_PATH__, OUT_PATH__;
-	float SampleRate;		// in Hz
+	string IN_PATH__, OUT_PATH__;  bool Mode;
+	float SampleRate;		// in MHz
 	float TimeRes;			// in ms
 
 	if (string(argv[1]) == "-h" || string(argv[1]) == "--help") {
-		cout << "Format: Spectrogram  <input file PATH>  <output file PATH> Sample_rate(in Hz) Time_Resolution(in ms) \n";
+		cout << "Format: Spectrogram  <input file PATH> DataMode(BIN/ASCII) <output file PATH> Sample_rate(in MHz) Time_Resolution(in seconds) \n";
 		exit(0);
 	}
 
-	if (argc < 5) {
+	if (argc < 6) {
 		cout << "Too few arguements.................\n ";
-		cout << "Format: Spectrogram  <input file PATH>  <output file PATH> Sample_rate(in Hz) Time_Resolution(in ms) \n";
+		cout << "Format: Spectrogram  <input file PATH> DataMode(BIN/ASCII) <output file PATH> Sample_rate(in MHz) Time_Resolution(in seconds) \n";
 		exit(-1);
 	}
-	else if (argc == 5) {
+	else if (argc == 6) {
 		IN_PATH__ = string(argv[1]);
-		OUT_PATH__ = string(argv[2]);
+		OUT_PATH__ = string(argv[3]);
 		
-		SampleRate = strtof(argv[3],NULL);
-		TimeRes = strtof(argv[4], NULL);
+		SampleRate = strtof(argv[4],NULL);
+		TimeRes = strtof(argv[5], NULL);
+		
+		if (argv[3] == "ASCII")		Mode = ASCII;
+		else						Mode = BIN;
 	}
 	else if (argc > 5) {
 
 		cout << "Too many arguements.................\n ";
-		cout << "Format: Spectrogram  <input file PATH>  <output file PATH> Sample_rate(in Hz) Time_Resolution(in ms) \n";
+		cout << "Format: Spectrogram  <input file PATH> DataMode(BIN/ASCII) <output file PATH> Sample_rate(in MHz) Time_Resolution(in seconds) \n";
 		exit(1);
 	}
 	
 
-	ifstream DataIn_Ascii; 
+	ifstream DataIn; 
 
-	DataIn_Ascii.open(IN_PATH__, ios::in);											// Opening Data File
+	DataIn.open(IN_PATH__, ios::in | (Mode ? 0 : ios::binary));											// Opening Data File
 
-	if (!DataIn_Ascii.is_open()) {
+	if (!DataIn.is_open()) {
 		cout << " Error Opening the file, please recheck the Input Filepath and Try Again \n";
-		cout << "Format: Spectrogram  <input file PATH>  <output file PATH> Sample_rate(in Hz) Time_Resolution(in ms) \n";
+		cout << "Format: Spectrogram  <input file PATH> DataMode(BIN/ASCII) <output file PATH> Sample_rate(in MHz) Time_Resolution(in seconds) \n";
 		
-		DataIn_Ascii.close();
+		DataIn.close();
 		exit(2);
 	}
-	DataIn_Ascii.seekg(ios::beg);
+	DataIn.seekg(ios::beg);
 	
 
-	string FILE_NAME__ = IN_PATH__.substr(IN_PATH__.find_last_of('/'));
+	const string FILE_NAME__ = IN_PATH__.substr(IN_PATH__.find_last_of('/'));
 
-	ifstream OutFileTemp; OutFileTemp.open(OUT_PATH__ + FILE_NAME__ + "_Ex_" + string((int)0) + " .bin" , ios::in); 
+	ifstream OutFileTemp; OutFileTemp.open(OUT_PATH__ + FILE_NAME__ + "_Ex_" + string((int)0) + " .bin" , ios::in | ios::binary); 
 
 	if (OutFileTemp.is_open()) {
 		cout << " Output file already exists, please use a different name and Try Again \n";
-		cout << "Format: Spectrogram  <input file PATH>  <output file PATH> Sample_rate(in Hz) Time_Resolution(in ms) \n";
+		cout << "Format: Spectrogram  <input file PATH> DataMode(BIN/ASCII) <output file PATH> Sample_rate(in MHz) Time_Resolution(in seconds) \n";
 		
 		OutFileTemp.close();
 		exit(3);
 	}
 	OutFileTemp.close();
 
-	OutFileTemp.open(OUT_PATH__ + FILE_NAME__ + "_Ey_" + string((int)0) + " .bin", ios::in);
+	OutFileTemp.open(OUT_PATH__ + FILE_NAME__ + "_Ey_" + string((int)0) + " .bin", ios::in | ios::binary);
 
 	if (OutFileTemp.is_open()) {
 		cout << " Output file already exists, please use a different name and Try Again \n";
-		cout << "Format: Spectrogram  <input file PATH>  <output file PATH> Sample_rate(in Hz) Time_Resolution(in ms) \n";
+		cout << "Format: Spectrogram  <input file PATH> DataMode(BIN/ASCII) <output file PATH> Sample_rate(in MHz) Time_Resolution(in seconds) \n";
 
 		OutFileTemp.close();
 		exit(3);
 	}
 	OutFileTemp.close(); 
 
-	ofstream FFT_Ex_OutBin, FFT_Ey_OutBin;  // check folder is empty
+	ofstream FFT_Ex_OutBin, FFT_Ey_OutBin;  //Todo: check folder is empty
 /*
 	if (!FFT_Ex_OutBin.is_open()) {
 		cout << " Error writting to file, please recheck the Output Filepath and Try Again \n";
-		cout << "Format: Spectrogram  <input file PATH>  <output file PATH> Sample_rate(in Hz) Time_Resolution(in ms) \n";
+		cout << "Format: Spectrogram  <input file PATH> DataMode(BIN/ASCII) <output file PATH> Sample_rate(in MHz) Time_Resolution(in seconds) \n";
 
 		FFT_Ex_OutBin.close();
 		exit(2);
@@ -106,50 +113,51 @@ int main(char* argv[], int argc)								// Spectrogram cpp
 
 */
 
-	int BUFF_Size = SampleRate*TimeRes / 1000;	
+	int BUFF_Size = (SampleRate*1000000)* TimeRes;	
 
 	Roundto2p(BUFF_Size);
 
-	TimeRes = (BUFF_Size / SampleRate) * 1000;		// in ms 
+	TimeRes = (BUFF_Size / (SampleRate * 1000000));		// in seconds
 
 	cout << "Time_Resolution set to " << TimeRes << "(in ms)" << endl;
 
 
-	int *Ex;  Ex = (int *)malloc(BUFF_Size * sizeof(int));
-	int *Ey;  Ey = (int *)malloc(BUFF_Size * sizeof(int));
-		
-	kiss_fftr_cfg cfg = kiss_fftr_alloc(BUFF_Size, 0, NULL, NULL);
+	float *Ex;  Ex = (float *)fftwf_malloc(BUFF_Size * sizeof(float));
+	float *Ey;  Ey = (float *)fftwf_malloc(BUFF_Size * sizeof(float));
 	
-	kiss_fft_cpx *FFT_Ex; FFT_Ex = (kiss_fft_cpx *)malloc(BUFF_Size * sizeof(kiss_fft_cpx));
-	kiss_fft_cpx *FFT_Ey; FFT_Ey = (kiss_fft_cpx *)malloc(BUFF_Size * sizeof(kiss_fft_cpx));
+	fftwf_complex *FFT_Ex; FFT_Ex = (fftwf_complex *)fftwf_malloc((BUFF_Size/2 +1)* sizeof(fftwf_complex));
+	fftwf_complex *FFT_Ey; FFT_Ey = (fftwf_complex *)fftwf_malloc((BUFF_Size/2 +1)* sizeof(fftwf_complex));
 
+	fftwf_plan cfg_x = fftwf_plan_dft_r2c_1d(BUFF_Size, Ex, FFT_Ex, FFTW_PATIENT);
+	fftwf_plan cfg_y = fftwf_plan_dft_r2c_1d(BUFF_Size, Ey, FFT_Ey, FFTW_PATIENT);
 
-	if (DataIn_Ascii.is_open()) {
-	
 		int i = 0;
-		while (!DataIn_Ascii.eof())
+		while (!DataIn.eof())
 		{
-			Ascii_to_Int(Ex, Ey, DataIn_Ascii, BUFF_Size);
+			if(Mode == ASCII)		Read_Ascii_to_float(Ex, Ey, DataIn, BUFF_Size);
+			else					Read_Bin_to_float(Ex, Ey, DataIn, BUFF_Size);
 				
-				kiss_fftr(cfg, Ex, FFT_Ex);
+				fftwf_execute(cfg_x);
 				FFT_Ex_OutBin.open(OUT_PATH__ + FILE_NAME__ + "_Ex_" + to_string(i) + " .bin", ios::out | ios::trunc);	 //| ios::binary);
 				FFT_Ex_OutBin.seekp(ios::beg);
-				for (int j = 0; j < BUFF_Size; j++)			 FFT_Ex_OutBin << FFT_Ex[j].r << "," << FFT_Ex[j].i << "\n";
+				for (int j = 0; j < BUFF_Size; j++)			 FFT_Ex_OutBin << FFT_Ex[j][real] << "," << FFT_Ex[j][imag] << "\n";
 				FFT_Ex_OutBin.close();
 
-				kiss_fftr(cfg, Ey, FFT_Ey);
+				fftwf_execute(cfg_y);
 				FFT_Ey_OutBin.open(OUT_PATH__ + FILE_NAME__ + "_Ey_" + to_string(i) + " .bin", ios::out | ios::trunc);	 //| ios::binary);
 				FFT_Ey_OutBin.seekp(ios::beg);
-				for (int j = 0; j < BUFF_Size; j++)			 FFT_Ey_OutBin << FFT_Ey[j].r << "," << FFT_Ey[j].i << "\n";
+				for (int j = 0; j < BUFF_Size; j++)			 FFT_Ey_OutBin << FFT_Ey[j][real] << "," << FFT_Ey[j][imag] << "\n";
 				FFT_Ey_OutBin.close();
 
 				i++;
-			}
 		}
-	else			cout << "Error Opening File\n";
 	
-	kiss_fftr_free(cfg);
-	
+	fftwf_destroy_plan(cfg_x);
+	fftwf_destroy_plan(cfg_y);
+
+	fftwf_free(Ex); fftwf_free(Ey);
+	fftwf_free(FFT_Ex); fftwf_free(FFT_Ey);
+
 	return 0;
 }
 
@@ -169,7 +177,7 @@ void Roundto2p(int &BUFF_Size) {
 
 }
 
-int Ascii_to_Int(int *Ex, int *Ey, ifstream &InpFile, int Buff_Size) {
+int Read_Ascii_to_float(float *Ex, float *Ey, ifstream &InpFile, int Buff_Size) {
 
 	string temp_x, temp_y;								// buffer
 	
@@ -180,13 +188,34 @@ int Ascii_to_Int(int *Ex, int *Ey, ifstream &InpFile, int Buff_Size) {
 		getline(InpFile, temp_x, ' ');
 		getline(InpFile, temp_y, ' ');
 
-		Ex[i] = (int)strtol(temp_x.c_str(), NULL, 10);
-		Ey[i] = (int)strtol(temp_y.c_str(), NULL, 10);
+		Ex[i] = (float)strtof(temp_x.c_str(), NULL);
+		Ey[i] = (float)strtof(temp_y.c_str(), NULL);
 
 		i++;
 	}
 
 	if (InpFile.eof())		while (i < Buff_Size)		{	Ex[i] = Ey[i] = 0;		i++; }
+
+	return 0;
+}
+int Read_Bin_to_float(float *Ex, float *Ey, ifstream &InpFile, int Buff_Size) {
+
+	char temp_x, temp_y;								// buffer
+
+	int i = 0;
+
+	while (i < Buff_Size && !InpFile.eof())
+	{
+		InpFile.read(&temp_x, 1);
+		InpFile.read(&temp_y, 1);
+
+		Ex[i] = (float)temp_x;
+		Ey[i] = (float)temp_y;
+
+		i++;
+	}
+
+	if (InpFile.eof())		while (i < Buff_Size) { Ex[i] = Ey[i] = 0;		i++; }
 
 	return 0;
 }
