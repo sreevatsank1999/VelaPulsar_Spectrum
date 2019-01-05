@@ -32,16 +32,16 @@ int main(char* argv[], int argc)								// Spectrogram cpp
 {																										// argv analysis
 	string IN_PATH__, OUT_PATH__;  bool Mode;
 	float SampleRate;		// in MHz
-	float TimeRes;			// in ms
+	float TimeRes;			// in seconds
 
 	if (string(argv[1]) == "-h" || string(argv[1]) == "--help") {
-		cout << "Format: Spectrogram  <input file PATH> DataMode(BIN/ASCII) <output file PATH> Sample_rate(in MHz) Time_Resolution(in seconds) \n";
+		cout << "Format: " + string(argv[0]) + "  <input file PATH> DataMode(BIN/ASCII) <output file PATH> Sample_rate(in MHz) Time_Resolution(in seconds) \n";
 		exit(0);
 	}
 
 	if (argc < 6) {
 		cout << "Too few arguements.................\n ";
-		cout << "Format: Spectrogram  <input file PATH> DataMode(BIN/ASCII) <output file PATH> Sample_rate(in MHz) Time_Resolution(in seconds) \n";
+		cout << "Format: " + string(argv[0]) + "  <input file PATH> DataMode(BIN/ASCII) <output file PATH> Sample_rate(in MHz) Time_Resolution(in seconds) \n";
 		exit(-1);
 	}
 	else if (argc == 6) {
@@ -57,7 +57,7 @@ int main(char* argv[], int argc)								// Spectrogram cpp
 	else if (argc > 5) {
 
 		cout << "Too many arguements.................\n ";
-		cout << "Format: Spectrogram  <input file PATH> DataMode(BIN/ASCII) <output file PATH> Sample_rate(in MHz) Time_Resolution(in seconds) \n";
+		cout << "Format: " + string(argv[0]) + "  <input file PATH> DataMode(BIN/ASCII) <output file PATH> Sample_rate(in MHz) Time_Resolution(in seconds) \n";
 		exit(1);
 	}
 	
@@ -68,7 +68,7 @@ int main(char* argv[], int argc)								// Spectrogram cpp
 
 	if (!DataIn.is_open()) {
 		cout << " Error Opening the file, please recheck the Input Filepath and Try Again \n";
-		cout << "Format: Spectrogram  <input file PATH> DataMode(BIN/ASCII) <output file PATH> Sample_rate(in MHz) Time_Resolution(in seconds) \n";
+		cout << "Format: " + string(argv[0]) + "  <input file PATH> DataMode(BIN/ASCII) <output file PATH> Sample_rate(in MHz) Time_Resolution(in seconds) \n";
 		
 		DataIn.close();
 		exit(2);
@@ -82,7 +82,7 @@ int main(char* argv[], int argc)								// Spectrogram cpp
 
 	if (OutFileTemp.is_open()) {
 		cout << " Output file already exists, please use a different name and Try Again \n";
-		cout << "Format: Spectrogram  <input file PATH> DataMode(BIN/ASCII) <output file PATH> Sample_rate(in MHz) Time_Resolution(in seconds) \n";
+		cout << "Format: " + string(argv[0]) + "  <input file PATH> DataMode(BIN/ASCII) <output file PATH> Sample_rate(in MHz) Time_Resolution(in seconds) \n";
 		
 		OutFileTemp.close();
 		exit(3);
@@ -93,7 +93,7 @@ int main(char* argv[], int argc)								// Spectrogram cpp
 
 	if (OutFileTemp.is_open()) {
 		cout << " Output file already exists, please use a different name and Try Again \n";
-		cout << "Format: Spectrogram  <input file PATH> DataMode(BIN/ASCII) <output file PATH> Sample_rate(in MHz) Time_Resolution(in seconds) \n";
+		cout << "Format: " + string(argv[0]) + "  <input file PATH> DataMode(BIN/ASCII) <output file PATH> Sample_rate(in MHz) Time_Resolution(in seconds) \n";
 
 		OutFileTemp.close();
 		exit(3);
@@ -104,7 +104,7 @@ int main(char* argv[], int argc)								// Spectrogram cpp
 /*
 	if (!FFT_Ex_OutBin.is_open()) {
 		cout << " Error writting to file, please recheck the Output Filepath and Try Again \n";
-		cout << "Format: Spectrogram  <input file PATH> DataMode(BIN/ASCII) <output file PATH> Sample_rate(in MHz) Time_Resolution(in seconds) \n";
+		cout << "Format: " + string(argv[0]) + "  <input file PATH> DataMode(BIN/ASCII) <output file PATH> Sample_rate(in MHz) Time_Resolution(in seconds) \n";
 
 		FFT_Ex_OutBin.close();
 		exit(2);
@@ -119,7 +119,7 @@ int main(char* argv[], int argc)								// Spectrogram cpp
 
 	TimeRes = (BUFF_Size / (SampleRate * 1000000));		// in seconds
 
-	cout << "Time_Resolution set to " << TimeRes << "(in ms)" << endl;
+	cout << "Time_Resolution set to " << TimeRes << "(in seconds)" << endl;
 
 
 	float *Ex;  Ex = (float *)fftwf_malloc(BUFF_Size * sizeof(float));
