@@ -28,17 +28,25 @@ struct Cpx_Int
 enum DataMode {BIN, ASCII};
 enum Complex { real, imag };
 
-int main(char* argv[], int argc)								// Spectrogram cpp
+int main()								// Spectrogram cpp
 {																										// argv analysis
 	string IN_PATH__, OUT_PATH__; 
 	bool InpMode, OutMode;
 	float SampleRate;		// in MHz
 	float TimeRes;			// in seconds
 
+	/*			Debug		*/
+	int argc = 7;
+
+	//argv = (char**) malloc(argc * 1024);
+	const char argv[][1024] = { "VelaPulsar_Spectrum.exe", "D:\\Documents\\SWAN_RRI\\Vega_Pulsar\\ch00_B0833-45_20150612_191438_010_1", "BIN", "D:\\Documents\\SWAN_RRI\\Vega_Pulsar\\FFT\\" , "BIN", "1.024", "0.100" };
+
 	if (string(argv[1]) == "-h" || string(argv[1]) == "--help") {
 		cout << "Format: " + string(argv[0]) + "  <input file PATH> InpMode(BIN/ASCII) <output file PATH> OutMode(BIN/ASCII) Sample_rate(in MHz) Time_Resolution(in seconds) \n";
 		exit(0);
 	}
+
+	cout << "argc: " << argc << endl;
 
 	if (argc < 7) {
 		cout << "Too few arguements.................\n ";
@@ -52,11 +60,20 @@ int main(char* argv[], int argc)								// Spectrogram cpp
 		SampleRate = strtof(argv[5],NULL);
 		TimeRes = strtof(argv[6], NULL);
 		
-		if (argv[3] == "ASCII")		InpMode = ASCII;
+		if (string(argv[2]) == string("ASCII"))		InpMode = ASCII;
 		else						InpMode = BIN;				// default
 
-		if (argv[4] == "ASCII")		OutMode = ASCII;
+		if (string(argv[4]) == string("ASCII"))		OutMode = ASCII;
 		else						OutMode = BIN;				// default
+		
+																						// Print Read data
+		cout << "IN_PATH__: " << IN_PATH__ << "\t" << "InMode: " << (InpMode ? "BIN" : "ASCII") << "\n";
+		cout << "OUT_PATH__: " << OUT_PATH__ << "\t" << "OutMode: " << (OutMode ? "BIN" : "ASCII") << "\n";
+		cout << "Sample Rate: " << SampleRate << " Mhz\n";
+		cout << "TimeRes: " << TimeRes << " Seconds\n"; 
+		cout << endl;
+
+
 	}
 	else if (argc > 7) {
 
@@ -80,9 +97,9 @@ int main(char* argv[], int argc)								// Spectrogram cpp
 	DataIn.seekg(ios::beg);
 	
 
-	const string FILE_NAME__ = IN_PATH__.substr(IN_PATH__.find_last_of('/'));
+	const string FILE_NAME__ = IN_PATH__.substr(IN_PATH__.find_last_of('\\'));
 
-	ifstream OutFileTemp; OutFileTemp.open(OUT_PATH__ + FILE_NAME__ + "_Ex_" + string((int)0) + " .bin" , ios::in | ios::binary); 
+	ifstream OutFileTemp; OutFileTemp.open(OUT_PATH__ + FILE_NAME__ + "_Ex_" + '0' + " .bin", ios::in | ios::binary);
 
 	if (OutFileTemp.is_open()) {
 		cout << " Output file already exists, please use a different name and Try Again \n";
@@ -93,7 +110,7 @@ int main(char* argv[], int argc)								// Spectrogram cpp
 	}
 	OutFileTemp.close();
 
-	OutFileTemp.open(OUT_PATH__ + FILE_NAME__ + "_Ey_" + string((int)0) + " .bin", ios::in | ios::binary);
+	OutFileTemp.open(OUT_PATH__ + FILE_NAME__ + "_Ey_" + '0' + " .bin", ios::in | ios::binary);
 
 	if (OutFileTemp.is_open()) {
 		cout << " Output file already exists, please use a different name and Try Again \n";
@@ -125,7 +142,6 @@ int main(char* argv[], int argc)								// Spectrogram cpp
 
 	cout << "Time_Resolution set to " << TimeRes << "(in seconds)" << endl;
 
-
 	float *Ex;  Ex = (float *)fftwf_malloc(BUFF_Size * sizeof(float));
 	float *Ey;  Ey = (float *)fftwf_malloc(BUFF_Size * sizeof(float));
 	
@@ -142,15 +158,17 @@ int main(char* argv[], int argc)								// Spectrogram cpp
 			else						Read_Bin_to_float(Ex, Ey, DataIn, BUFF_Size);
 				
 				fftwf_execute(cfg_x);
-				FFT_Ex_OutBin.open(OUT_PATH__ + FILE_NAME__ + "_Ex_" + to_string(i) + " .bin", ios::out | ios::trunc | OutMode ? 0 : ios::binary);
+				FFT_Ex_OutBin.open(OUT_PATH__ + FILE_NAME__ + "_Ex_" + to_string(i) + " .bin", ios::out | ios::trunc | (OutMode ? (int)0 : ios::binary));
 				FFT_Ex_OutBin.seekp(ios::beg);
 
-				if (OutMode == ASCII)		for (int j = 0; j < BUFF_Size/2 + 1; j++)			 FFT_Ex_OutBin << FFT_Ex[j][real] << " " << FFT_Ex[j][imag] << "\n";
+				if (OutMode == ASCII)		
+					for (int j = 0; j < BUFF_Size/2 + 1; j++)			 
+						FFT_Ex_OutBin << FFT_Ex[j][real] << " " << FFT_Ex[j][imag] << "\n";
 				else						FFT_Ex_OutBin.write((char*)FFT_Ex, 2 * sizeof(float)*(BUFF_Size / 2 + 1));
 				FFT_Ex_OutBin.close();
 
 				fftwf_execute(cfg_y);
-				FFT_Ey_OutBin.open(OUT_PATH__ + FILE_NAME__ + "_Ey_" + to_string(i) + " .bin", ios::out | ios::trunc | OutMode ? 0 : ios::binary);
+				FFT_Ey_OutBin.open(OUT_PATH__ + FILE_NAME__ + "_Ey_" + to_string(i) + " .bin", ios::out | ios::trunc | (OutMode ? (int)0 : ios::binary));
 				FFT_Ey_OutBin.seekp(ios::beg);
 
 				if (OutMode == ASCII)		for (int j = 0; j < BUFF_Size / 2 + 1; j++)			 FFT_Ey_OutBin << FFT_Ey[j][real] << " " << FFT_Ey[j][imag] << "\n";
@@ -174,7 +192,7 @@ void Roundto2p(int &BUFF_Size) {
 	int p = 0;
 	int temp_Size = BUFF_Size;
 
-	while (temp_Size == 1)
+	while (temp_Size > 1)
 	{
 		temp_Size = temp_Size >> 1;
 		p++;
