@@ -9,7 +9,7 @@
 #include <sys/types.h>
 #include <math.h>
 
-#include"../lib/fftw-3.3.5-dll64/fftw3.h"
+#include"../lib/fftw-3.3.5-dll64/include/fftw3.h"
 #include "stdafx.h"
 
 using namespace std;
