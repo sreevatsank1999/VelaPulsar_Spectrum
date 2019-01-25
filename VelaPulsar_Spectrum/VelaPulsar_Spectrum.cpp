@@ -10,12 +10,12 @@
 #include <math.h>
 
 #include"../lib/fftw-3.3.5-dll64/include/fftw3.h"
+//#include "../lib/mathgl-2.4.2-mingw.win64/include/mgl_cf.h"
 #include "stdafx.h"
 
 using namespace std;
 
 enum DataMode { BIN, ASCII };
-enum Complex { real, imag };
 
 void Roundto2p(int &N);							// round(N) to closest power of 2
 
@@ -32,9 +32,10 @@ int Read_Bin_to_float(float *Ex, float *Ey, ifstream &InpFile, const int Buff_le
 
 int isValid_overwrite_YesNo(string overwrite_YesNo);
 bool StringToBool_overwrite_YesNo(string overwrite_YesNo);
-
+//int PLot();
 int main()								// Spectrogram cpp
-{																										// argv analysis
+{
+//	PLot(); exit(0);												// argv analysis
 	string IN_PATH__, OUT_PATH__; 
 	DataMode InpMode, OutMode;
 	float SampleRate;		// in MHz
@@ -44,7 +45,7 @@ int main()								// Spectrogram cpp
 	int argc = 7;
 
 	//argv = (char**) malloc(argc * 1024);
-	const char argv[][1024] = { "VelaPulsar_Spectrum.exe", "D:\\Documents\\SWAN_RRI\\Vega_Pulsar\\ch00_B0833-45_20150612_191438_010_1", "BIN", "D:\\Documents\\SWAN_RRI\\Vega_Pulsar\\FFT\\" , "BIN", "1.024", "0.100" };
+	const char argv[][1024] = { "VelaPulsar_Spectrum.exe", "D:\\Documents\\SWAN_RRI\\Vega_Pulsar\\ch00_B0833-45_20150612_191438_010_1", "ASCII", "D:\\Documents\\SWAN_RRI\\Vega_Pulsar\\FFT\\" , "BIN", "1.024", "0.100" };
 
 	if (string(argv[1]) == "-h" || string(argv[1]) == "--help") {
 		cout << "Format: " + string(argv[0]) + "  <input file PATH> InpMode(BIN/ASCII) <output file PATH> OutMode(BIN/ASCII) Sample_rate(in MHz) Time_Resolution(in seconds) \n";
@@ -87,11 +88,11 @@ int main()								// Spectrogram cpp
 		exit(1);
 	}
 	
-	ios_base::sync_with_stdio(false);					// Fast I\O C ++
-	cin.tie(NULL);
+//	ios_base::sync_with_stdio(false);					// Fast I\O C ++
+//	cin.tie(NULL);
 
 
-	ifstream DataIn;  DataIn.rdbuf()->pubsetbuf(nullptr, 0); DataIn.tie(NULL);
+	ifstream DataIn; // DataIn.rdbuf()->pubsetbuf(nullptr, 0); DataIn.tie(NULL);
 
 	DataIn.open(IN_PATH__, ios::in | (InpMode ? 0 : ios::binary));											// Opening Data File
 
@@ -202,10 +203,10 @@ int main()								// Spectrogram cpp
 				fftwf_execute(plan_x);
 				fftwf_execute(plan_y);
 
-				if (OutMode == ASCII)		for (int j = 0; j < N_FFTs_loaded * FFT_len/2 + 1; j++)			Ex_FFT_Out << FFT_Ex[j][real] << " " << FFT_Ex[j][imag] << "\n";
+				if (OutMode == ASCII)		for (int j = 0; j < N_FFTs_loaded * FFT_len/2 + 1; j++)			Ex_FFT_Out << FFT_Ex[j][0] << " " << FFT_Ex[j][1] << "\n";
 				else						Ex_FFT_Out.write((char*)FFT_Ex, N_FFTs_loaded * (2 * sizeof(float)*(FFT_len / 2 + 1)));
 
-				if (OutMode == ASCII)		for (int j = 0; j < N_FFTs_loaded * FFT_len / 2 + 1; j++)			 Ey_FFT_Out << FFT_Ey[j][real] << " " << FFT_Ey[j][imag] << "\n";
+				if (OutMode == ASCII)		for (int j = 0; j < N_FFTs_loaded * FFT_len / 2 + 1; j++)			 Ey_FFT_Out << FFT_Ey[j][0] << " " << FFT_Ey[j][1] << "\n";
 				else						Ey_FFT_Out.write((char*)FFT_Ey, N_FFTs_loaded * (2 * sizeof(float)*(FFT_len / 2 + 1)));
 		}
 	
@@ -351,3 +352,29 @@ bool StringToBool_overwrite_YesNo(string overwrite_YesNo) {
 	if (Validoverwrite_YesNo != -1)			return (Validoverwrite_YesNo != false);
 	else	printf("Error: StringToBool_overwrite_YesNo() couldn't convert to bool \n");
 }
+
+/*
+int PLot() {
+
+
+	mglData dat(30, 40); // data to for plotting 
+	for(long i=0;i<30;i++) for(long j=0;j<40;j++) dat.a[i+30*j] = 1/(1+(i-15)*(i-15)/225.+(j-20)*(j-20)/400.);
+
+	mglGraph gr; // class for plot drawing 
+	gr.Rotate(50,60); // rotate axis 
+	gr.Light(true); 
+
+	gr.Surf(dat); // plot surface Basically plot is d
+
+	return 0;
+
+
+
+	HMGL gr = mgl_create_graph(600, 400);
+	mgl_fplot(gr, "sin(pi*x)", "", ""); 
+	mgl_write_frame(gr, "test.png", ""); 
+	mgl_delete_graph(gr);
+
+	return 0;
+} 
+*/
