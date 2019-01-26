@@ -19,7 +19,7 @@
  ***************************************************************************/
 #ifndef _MGL_THREAD_H_
 #define _MGL_THREAD_H_
-#include "mgl2/define.h"
+#include "define.h"
 //-----------------------------------------------------------------------------
 #if MGL_HAVE_PTHREAD
 #include <pthread.h>

@@ -20,14 +20,14 @@
 #ifndef _MGL_H_
 #define _MGL_H_
 
-#include "mgl2/mgl_cf.h"
+#include "mgl_cf.h"
 #ifdef __cplusplus
-#include "mgl2/data.h"
-#include "mgl2/datac.h"
+#include "data.h"
+#include "datac.h"
 #include <sys/stat.h>
 //-----------------------------------------------------------------------------
 /// Wrapper class for all graphics
-class MGL_EXPORT mglGraph
+class mglGraph
 {
 	mglGraph(const mglGraph &) {}	// copying is not allowed
 	const mglGraph &operator=(const mglGraph &t)	{	return t;	}
@@ -2220,7 +2220,7 @@ public:
 };
 //-----------------------------------------------------------------------------
 /// Wrapper class for MGL parsing
-class MGL_EXPORT mglParse
+class mglParse
 {
 	HMPR pr;
 	mglParse &operator=(mglParse &p)

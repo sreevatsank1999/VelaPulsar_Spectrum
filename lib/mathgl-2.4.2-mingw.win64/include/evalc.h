@@ -20,7 +20,7 @@
 #ifndef _MGL_EVALC_H_
 #define _MGL_EVALC_H_
 //-----------------------------------------------------------------------------
-#include "mgl2/eval.h"
+#include "eval.h"
 //-----------------------------------------------------------------------------
 /// Class for evaluating formula specified by the string
 class MGL_EXPORT mglFormulaC					// ������ ��� ����� � ���������� ������

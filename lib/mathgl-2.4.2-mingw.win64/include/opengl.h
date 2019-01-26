@@ -20,7 +20,7 @@
 #ifndef MGL_CANVAS_GL_H
 #define MGL_CANVAS_GL_H
 //-----------------------------------------------------------------------------
-#include "mgl2/canvas.h"
+#include "canvas.h"
 //-----------------------------------------------------------------------------
 class MGL_EXPORT mglCanvasGL : public mglCanvas
 {

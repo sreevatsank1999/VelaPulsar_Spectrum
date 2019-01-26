@@ -20,9 +20,9 @@
 #ifndef _MGL_WINDOW_H_
 #define _MGL_WINDOW_H_
 
-#include "mgl2/qt.h"
-#include "mgl2/fltk.h"
-//#include "mgl2/wx.h"
+#include "qt.h"
+#include "fltk.h"
+//#include "wx.h"
 //-----------------------------------------------------------------------------
 /// Wrapper class for all windows displaying graphics
 class MGL_EXPORT mglWindow : public mglWnd

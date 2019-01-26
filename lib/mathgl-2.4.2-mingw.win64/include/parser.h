@@ -21,7 +21,7 @@
 #define _MGL_PARSER_H_
 
 #ifdef __cplusplus
-#include "mgl2/mgl.h"
+#include "mgl.h"
 #if MGL_HAVE_LTDL
 #include <ltdl.h>
 #endif

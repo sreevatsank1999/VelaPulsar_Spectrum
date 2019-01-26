@@ -20,7 +20,7 @@
 #ifndef _MGL_ADDON_H_
 #define _MGL_ADDON_H_
 //-----------------------------------------------------------------------------
-#include "mgl2/define.h"
+#include "define.h"
 #ifdef __cplusplus
 //-----------------------------------------------------------------------------
 /// Explicit scheme for 1 step of axial diffraction

@@ -20,11 +20,11 @@
 #ifndef MGL_WX_H
 #define MGL_WX_H
 //-----------------------------------------------------------------------------
-#include <mgl2/wnd.h>
-#include <wx/window.h>
-#include <wx/image.h>
-#include <wx/timer.h>
-#include <wx/bitmap.h>
+#include "wnd.h"
+#include <wx/window.h"
+#include <wx/image.h"
+#include <wx/timer.h"
+#include <wx/bitmap.h"
 class mglCanvas;
 //-----------------------------------------------------------------------------
 /// Convert MathGL image to wxBitmap

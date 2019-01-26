@@ -20,7 +20,7 @@
 #ifndef _MGL_BASE_H_
 #define _MGL_BASE_H_
 //#if !defined(_MSC_VER) && !defined(__BORLANDC__)
-#include "mgl2/abstract.h"
+#include "abstract.h"
 
 #ifdef __cplusplus
 

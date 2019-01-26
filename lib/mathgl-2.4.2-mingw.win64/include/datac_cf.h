@@ -20,7 +20,7 @@
 #ifndef _MGL_DATAC_CF_H_
 #define _MGL_DATAC_CF_H_
 //-----------------------------------------------------------------------------
-#include "mgl2/abstract.h"
+#include "abstract.h"
 //-----------------------------------------------------------------------------
 #if MGL_HAVE_GSL
 #include <gsl/gsl_vector.h>

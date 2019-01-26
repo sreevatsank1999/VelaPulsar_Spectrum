@@ -20,10 +20,10 @@
 #ifndef _MGL_ABSTRACT_H_
 #define _MGL_ABSTRACT_H_
 
-#include "mgl2/define.h"
+#include "define.h"
 //-----------------------------------------------------------------------------
 #ifdef __cplusplus
-#include "mgl2/type.h"
+#include "type.h"
 #define MGL_TO_WCS(str,code)	if(str && *str){size_t s=mbstowcs(0,str,0); wchar_t *wcs=new wchar_t[s+1]; mbstowcs(wcs,str,s); wcs[s]=0; code; delete []wcs;}else{const wchar_t *wcs=L""; code;}
 //-----------------------------------------------------------------------------
 class mglBase;

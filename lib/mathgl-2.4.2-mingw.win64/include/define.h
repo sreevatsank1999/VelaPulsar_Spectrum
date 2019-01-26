@@ -38,14 +38,14 @@
 #define WIN32 1
 #endif
 
-#include "mgl2/config.h"
+#include "config.h"
 #ifndef SWIG
 
 #if MGL_HAVE_PTHR_WIDGET|MGL_HAVE_PTHREAD
 #include <pthread.h>
 #endif
 
-#include "mgl2/dllexport.h"
+#include "dllexport.h"
 #if defined(MGL_LIB_MSVC)
 #define MGL_EXTERN
 #else

@@ -21,23 +21,23 @@
 #define _MGL_CF_H_
 //-----------------------------------------------------------------------------
 #ifdef __cplusplus
-#include <mgl2/data.h>
-#include <mgl2/datac.h>
+#include "data.h"
+#include "datac.h"
 #endif
 //-----------------------------------------------------------------------------
-#include <mgl2/base_cf.h>
-#include <mgl2/data_cf.h>
-#include <mgl2/datac_cf.h>
-#include <mgl2/cont.h>
-#include <mgl2/fit.h>
-#include <mgl2/plot.h>
-#include <mgl2/surf.h>
-#include <mgl2/volume.h>
-#include <mgl2/vect.h>
-#include <mgl2/prim.h>
-#include <mgl2/other.h>
-#include <mgl2/canvas_cf.h>
-#include <mgl2/addon.h>
+#include "base_cf.h"
+#include "data_cf.h"
+#include "datac_cf.h"
+#include "cont.h"
+#include "fit.h"
+#include "plot.h"
+#include "surf.h"
+#include "volume.h"
+#include "vect.h"
+#include "prim.h"
+#include "other.h"
+#include "canvas_cf.h"
+#include "addon.h"
 //-----------------------------------------------------------------------------
 #if MGL_HAVE_OPENGL
 #ifdef __cplusplus

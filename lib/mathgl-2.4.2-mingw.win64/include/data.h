@@ -20,8 +20,8 @@
 #ifndef _MGL_DATA_H_
 #define _MGL_DATA_H_
 
-#include "mgl2/data_cf.h"
-#include "mgl2/pde.h"
+#include "data_cf.h"
+#include "pde.h"
 //-----------------------------------------------------------------------------
 #include <stdarg.h>
 //-----------------------------------------------------------------------------
@@ -30,7 +30,7 @@ mreal MGL_EXPORT mglSpline3(const mreal *a, long nx, long ny, long nz, mreal x, 
 mreal MGL_EXPORT mglSpline3s(const mreal *a, long nx, long ny, long nz, mreal x, mreal y, mreal z);
 //-----------------------------------------------------------------------------
 /// Class for working with data array
-class MGL_EXPORT mglData : public mglDataA
+class mglData : public mglDataA
 {
 public:
 using mglDataA::Momentum;
@@ -608,7 +608,7 @@ inline mreal mglGSpline(const mglDataA &coef, mreal dx, mreal *d1=0, mreal *d2=0
 {	return mgl_gspline(&coef, dx, d1,d2);	}
 //-----------------------------------------------------------------------------
 /// Wrapper class for expression evaluating
-class MGL_EXPORT mglExpr
+class mglExpr
 {
 	HMEX ex;
 	mglExpr(const mglExpr &){}	// copying is not allowed
@@ -636,7 +636,7 @@ public:
 };
 //-----------------------------------------------------------------------------
 /// Class which present equidistantly distributed data
-class MGL_EXPORT mglDataV : public mglDataA
+class mglDataV : public mglDataA
 {
 	long nx;	///< number of points in 1st dimensions ('x' dimension)
 	long ny;	///< number of points in 2nd dimensions ('y' dimension)
@@ -701,7 +701,7 @@ public:
 };
 //-----------------------------------------------------------------------------
 /// Class which present FFT frequency as data array
-class MGL_EXPORT mglDataW : public mglDataA
+class mglDataW : public mglDataA
 {
 	long nx;	///< number of points in 1st dimensions ('x' dimension)
 	long ny;	///< number of points in 2nd dimensions ('y' dimension)
@@ -886,7 +886,7 @@ public:
 };
 //-----------------------------------------------------------------------------
 /// Class which present column of another data as data array
-class MGL_EXPORT mglDataT : public mglDataA
+class mglDataT : public mglDataA
 {
 	const mglDataA &dat;
 	long ind;
@@ -936,7 +936,7 @@ public:
 };
 //-----------------------------------------------------------------------------
 /// Class which present row of another data as data array
-class MGL_EXPORT mglDataR : public mglDataA
+class mglDataR : public mglDataA
 {
 	const mglDataA &dat;
 	long ind;
@@ -986,7 +986,7 @@ public:
 };
 //-----------------------------------------------------------------------------
 /// Class which present std::vector as data array
-class MGL_EXPORT mglDataS : public mglDataA
+class mglDataS : public mglDataA
 {
 public:
 	std::vector<mreal> dat;

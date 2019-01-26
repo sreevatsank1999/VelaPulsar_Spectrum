@@ -20,7 +20,7 @@
 #ifndef _MGL_EVAL_H_
 #define _MGL_EVAL_H_
 //-----------------------------------------------------------------------------
-#include "mgl2/define.h"
+#include "define.h"
 /// types of errors
 #define MGL_ERR_LOG		1
 #define MGL_ERR_ARC		2

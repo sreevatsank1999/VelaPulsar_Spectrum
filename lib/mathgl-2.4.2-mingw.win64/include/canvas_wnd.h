@@ -20,8 +20,8 @@
 #ifndef _MGL_CANVAS_WND_H_
 #define _MGL_CANVAS_WND_H_
 
-#include "mgl2/canvas.h"
-#include "mgl2/wnd.h"
+#include "canvas.h"
+#include "wnd.h"
 //-----------------------------------------------------------------------------
 /// Base class for windows containing MathGL graphics
 class MGL_EXPORT mglCanvasWnd : public mglCanvas

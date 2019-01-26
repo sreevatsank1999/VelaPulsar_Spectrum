@@ -20,7 +20,7 @@
 #ifndef _MGL_TYPE_H_
 #define _MGL_TYPE_H_
 
-#include "mgl2/define.h"
+#include "define.h"
 //-----------------------------------------------------------------------------
 const mreal mglPi = M_PI;
 const mreal mglNaN = NAN;

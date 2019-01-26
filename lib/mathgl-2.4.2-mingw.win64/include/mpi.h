@@ -20,7 +20,7 @@
 #ifndef _MGL_MPI_H_
 #define _MGL_MPI_H_
 
-#include "mgl2/mgl_cf.h"
+#include "mgl_cf.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -34,7 +34,7 @@ void MGL_EXPORT mgl_mpi_recv_(uintptr_t *gr, int *id);
 #ifdef __cplusplus
 }
 
-#include "mgl2/mgl.h"
+#include "mgl.h"
 //-----------------------------------------------------------------------------
 /// Wrapper class for all graphics
 class MGL_EXPORT mglGraphMPI:public mglGraph

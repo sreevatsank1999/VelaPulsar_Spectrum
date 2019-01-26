@@ -20,8 +20,8 @@
 #ifndef _MGL_DATAC_H_
 #define _MGL_DATAC_H_
 
-#include "mgl2/data.h"
-#include "mgl2/datac_cf.h"
+#include "data.h"
+#include "datac_cf.h"
 //-----------------------------------------------------------------------------
 #include <vector>
 #include <string>

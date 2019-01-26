@@ -31,7 +31,7 @@
 #include <FL/Fl_Counter.H>
 #include <FL/Fl_Menu_Bar.H>
 #include <FL/Fl_Progress.H>
-#include <mgl2/fltk.h>
+#include "fltk"
 class mglCanvas;
 //-----------------------------------------------------------------------------
 /// Class is FLTK widget which display MathGL graphics

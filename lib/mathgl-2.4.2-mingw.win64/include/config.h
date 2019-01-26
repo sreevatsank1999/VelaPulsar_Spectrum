@@ -23,6 +23,7 @@
 #define MGL_HAVE_PTHR_WIDGET	0
 #define MGL_HAVE_ATTRIBUTE	0
 #define MGL_HAVE_C99_COMPLEX	0
+#define MGL_HAVE_TYPEOF		0
 #else
 #define MGL_SYS_NAN			1
 #define MGL_HAVE_PTHREAD	0
@@ -33,7 +34,7 @@
 
 #define MGL_SIZEOF_LONG	4
 #define MGL_HAVE_LTDL	0
-#define MGL_HAVE_RVAL	1
+#define MGL_HAVE_RVAL	0
 #define MGL_HAVE_ZLIB	1
 #define MGL_HAVE_PNG	1
 #define MGL_HAVE_GSL	1

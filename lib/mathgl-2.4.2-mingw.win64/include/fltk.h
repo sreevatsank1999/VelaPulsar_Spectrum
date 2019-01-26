@@ -20,7 +20,7 @@
 #ifndef _MGL_FLTK_H_
 #define _MGL_FLTK_H_
 
-#include <mgl2/abstract.h>
+#include "abstract.h"
 //-----------------------------------------------------------------------------
 #ifdef __cplusplus
 extern "C" {
@@ -42,7 +42,7 @@ MGL_EXPORT void *mgl_fltk_widget(HMGL gr);
 #ifdef __cplusplus
 }
 //-----------------------------------------------------------------------------
-#include <mgl2/wnd.h>
+#include "wnd.h"
 //-----------------------------------------------------------------------------
 /// Wrapper class for windows displaying graphics
 class MGL_EXPORT mglFLTK : public mglWnd
