@@ -7,6 +7,8 @@
 #include <vector>
 
 #include <sys/types.h>
+//#include <thread>
+#include <sys/stat.h>
 #include <math.h>
 
 #include"../lib/fftw-3.3.5-dll64/include/fftw3.h"
@@ -19,11 +21,12 @@ enum DataMode { BIN, ASCII };
 
 void Roundto2p(int &N);							// round(N) to closest power of 2
 
-int Calc_Optm_BuffNum(const int64_t DataSize, const DataMode InpMode, const int64_t BuffSize, const int64_t MAX_TotSize);							// TotSize = BuffNum*BuffSize;			// BuffSize, MAX_TotSize in bytes, 
+int Calc_Optm_FFTNum(const int64_t DataSize, const DataMode InpMode, const int64_t BuffSize, const int64_t MAX_TotSize);							// TotSize = BuffNum*BuffSize;			// BuffSize, MAX_TotSize in bytes, 
+int64_t Calc_Optm_ASCII_Writebuff_size(const int N, const int64_t MAX_TotSize = 512 * 1024 * 1024);								// Calculates Write Buff size in the case of Outmode == ASCII
 
 // File Tools
 
-int64_t getFile_Size(ifstream &File);						// Return Size in bytes
+int64_t getFile_Size(const string &_FileName); 						// Return Size in bytes
 
 int Read_Ascii_to_float(float *Ex, float *Ey, ifstream &InpFile, const int Buff_len, const int Buff_num, const int64_t MAX_TotSize = 512 * 1024 * 1024);    
 int Read_Bin_to_float(float *Ex, float *Ey, ifstream &InpFile, const int Buff_len, const int Buff_num, const int64_t MAX_TotSize = 512 * 1024 * 1024);			//Buff_num == (No of Buff_len Arrays to fill)/Channel	MAX_TotSize == Max Temp Buffer Size			
@@ -32,20 +35,14 @@ int Read_Bin_to_float(float *Ex, float *Ey, ifstream &InpFile, const int Buff_le
 
 int isValid_overwrite_YesNo(string overwrite_YesNo);
 bool StringToBool_overwrite_YesNo(string overwrite_YesNo);
-//int PLot();
-int main()								// Spectrogram cpp
+
+int main(int argc, char *argv[])								// Spectrogram cpp
 {
 //	PLot(); exit(0);												// argv analysis
 	string IN_PATH__, OUT_PATH__; 
 	DataMode InpMode, OutMode;
 	float SampleRate;		// in MHz
 	float TimeRes;			// in seconds
-
-	/*			Debug		*/
-	int argc = 7;
-
-	//argv = (char**) malloc(argc * 1024);
-	const char argv[][1024] = { "VelaPulsar_Spectrum.exe", "D:\\Documents\\SWAN_RRI\\Vega_Pulsar\\ch00_B0833-45_20150612_191438_010_1", "ASCII", "D:\\Documents\\SWAN_RRI\\Vega_Pulsar\\FFT\\" , "BIN", "1.024", "0.100" };
 
 	if (string(argv[1]) == "-h" || string(argv[1]) == "--help") {
 		cout << "Format: " + string(argv[0]) + "  <input file PATH> InpMode(BIN/ASCII) <output file PATH> OutMode(BIN/ASCII) Sample_rate(in MHz) Time_Resolution(in seconds) \n";
@@ -73,8 +70,8 @@ int main()								// Spectrogram cpp
 		else						OutMode = BIN;				// default
 		
 																						// Print Read data
-		cout << "IN_PATH__: " << IN_PATH__ << "\t" << "InMode: " << (InpMode ? "BIN" : "ASCII") << "\n";
-		cout << "OUT_PATH__: " << OUT_PATH__ << "\t" << "OutMode: " << (OutMode ? "BIN" : "ASCII") << "\n";
+		cout << "IN_PATH__: " << IN_PATH__ << "\t" << "InMode: " << (InpMode ? "ASCII" : "BIN") << "\n";
+		cout << "OUT_PATH__: " << OUT_PATH__ << "\t" << "OutMode: " << (OutMode ? "ASCII" : "BIN") << "\n";
 		cout << "Sample Rate: " << SampleRate << " Mhz\n";
 		cout << "TimeRes: " << TimeRes << " Seconds\n"; 
 		cout << endl;
@@ -88,11 +85,11 @@ int main()								// Spectrogram cpp
 		exit(1);
 	}
 	
-//	ios_base::sync_with_stdio(false);					// Fast I\O C ++
-//	cin.tie(NULL);
+	ios_base::sync_with_stdio(false);					// Fast I\O C ++
+	cin.tie(NULL);
 
 
-	ifstream DataIn; // DataIn.rdbuf()->pubsetbuf(nullptr, 0); DataIn.tie(NULL);
+	ifstream DataIn;  DataIn.rdbuf()->pubsetbuf(nullptr, 0); DataIn.tie(NULL);
 
 	DataIn.open(IN_PATH__, ios::in | (InpMode ? 0 : ios::binary));											// Opening Data File
 
@@ -105,24 +102,24 @@ int main()								// Spectrogram cpp
 	}
 	DataIn.seekg(ios::beg);
 
-	const int64_t DataIn_Size = getFile_Size(DataIn);
+	const int64_t DataIn_Size = getFile_Size(IN_PATH__);
 
 	const string FILE_NAME__ = IN_PATH__.substr(IN_PATH__.find_last_of('\\'));
 
 	
 	ifstream OutFileTemp;
 	
-	OutFileTemp.open(OUT_PATH__ + FILE_NAME__ + "_Ex_" + (OutMode ? ".bin" : ".txt"), ios::in | (OutMode ? 0 : ios::binary));
+	OutFileTemp.open(OUT_PATH__ + FILE_NAME__ + "_Ex_" + (OutMode ? ".txt" : ".bin"), ios::in | (OutMode ? 0 : ios::binary));
 
 	if (OutFileTemp.is_open()) {
-		cout << " Output file already exists, Do you want to overwrite? (y/n): ";
+		cout << "Ex Channel Output file already exists, Do you want to overwrite? (y/n): ";
 		string YesNo;			 cin >> YesNo;
 
 		if (StringToBool_overwrite_YesNo(YesNo) == true) {
 
 			OutFileTemp.close();
 
-			const int result = remove((OUT_PATH__ + FILE_NAME__ + "_Ex_" + (OutMode ? ".bin" : ".txt")).c_str());				// remove the existing file
+			const int result = remove((OUT_PATH__ + FILE_NAME__ + "_Ex_" + (OutMode ? ".txt" : ".bin")).c_str());				// remove the existing file
 			if (result != 0) { cout << "Error deleting file \n"; 	exit(3); }
 		}
 		else
@@ -135,10 +132,10 @@ int main()								// Spectrogram cpp
 	}
 	OutFileTemp.close();
 
-	OutFileTemp.open(OUT_PATH__ + FILE_NAME__ + "_Ey_" + (OutMode ? ".bin" : ".txt"), ios::in | (OutMode ? 0 : ios::binary));
+	OutFileTemp.open(OUT_PATH__ + FILE_NAME__ + "_Ey_" + (OutMode ? ".txt" : ".bin"), ios::in | (OutMode ? 0 : ios::binary));
 
 	if (OutFileTemp.is_open()) {
-		cout << " Output file already exists, Do you want to overwrite? (y/n): ";
+		cout << "Ey Channel Output file already exists, Do you want to overwrite? (y/n): ";
 		string YesNo;			 cin >> YesNo;
 
 		if (StringToBool_overwrite_YesNo(YesNo) == true) { ; }					// No need to remove the file here as Later anyhow the output file is opened in truc mode which deletes the content of the file
@@ -152,9 +149,6 @@ int main()								// Spectrogram cpp
 	}
 	OutFileTemp.close(); 
 
-	ofstream Ex_FFT_Out;	Ex_FFT_Out.rdbuf()->pubsetbuf(nullptr, 0);   Ex_FFT_Out.tie(NULL);
-    ofstream Ey_FFT_Out;	Ey_FFT_Out.rdbuf()->pubsetbuf(nullptr, 0);	 Ey_FFT_Out.tie(NULL);
-					
 /*																							//Todo: check folder is empty     
 	if (!Ex_FFT_Out.is_open()) {
 		cout << " Error writting to file, please recheck the Output Filepath and Try Again \n";
@@ -178,40 +172,72 @@ int main()								// Spectrogram cpp
 
 	const int64_t MAX_Avail_RAM = (int64_t)2 * 1024 * 1024 * 1024;
 
-	int N_FFTs = Calc_Optm_BuffNum(DataIn_Size, InpMode, (FFT_len / 2 + 1) * sizeof(fftwf_complex), MAX_Avail_RAM);
-	N_FFTs = (N_FFTs % 2) ? N_FFTs : (N_FFTs - 1);																				// Assuming N_FFT != 0 or 1, N_FFT >=2,		Todo: Handle 0 & 1 Cases, Add Multi-channel Capability
+	int N_FFTs = Calc_Optm_FFTNum(DataIn_Size, InpMode, (FFT_len / 2 + 1) * sizeof(fftwf_complex), MAX_Avail_RAM);
+	N_FFTs = (N_FFTs % 2) ? (N_FFTs - 1) : N_FFTs;																				// Assuming N_FFT != 0 or 1, N_FFT >=2,		Todo: Handle 0 & 1 Cases, Add Multi-channel Capability
 	 
-	fftwf_complex *FFT_Ex; FFT_Ex = (fftwf_complex *)fftwf_malloc((N_FFTs/2)*(FFT_len/2 +1)* sizeof(fftwf_complex));
-	fftwf_complex *FFT_Ey; FFT_Ey = (fftwf_complex *)fftwf_malloc((N_FFTs/2)*(FFT_len/2 +1)* sizeof(fftwf_complex));
-																															//FFTW Advacned Interface 
-	fftwf_plan plan_x = fftwf_plan_many_dft_r2c(1, &FFT_len, N_FFTs, (float *)FFT_Ex, &FFT_len, 1, (FFT_len / 2 + 1) * sizeof(fftwf_complex), FFT_Ex, &FFT_len, 1, (FFT_len / 2 + 1) * sizeof(fftwf_complex), FFTW_PATIENT);
-	fftwf_plan plan_y = fftwf_plan_many_dft_r2c(1, &FFT_len, N_FFTs, (float *)FFT_Ey, &FFT_len, 1, (FFT_len / 2 + 1) * sizeof(fftwf_complex), FFT_Ey, &FFT_len, 1, (FFT_len / 2 + 1) * sizeof(fftwf_complex), FFTW_PATIENT);
+//	fftw_init_threads();				// Multi-threading
 
-		Ex_FFT_Out.open(OUT_PATH__ + FILE_NAME__ + "_Ex_" + (OutMode ? ".bin" : ".txt"), ios::out | ios::trunc | (OutMode ? (int)0 : ios::binary));
-		Ex_FFT_Out.seekp(ios::beg);
+	fftwf_complex *FFT_Ex; FFT_Ex = (fftwf_complex *)fftwf_malloc((N_FFTs/2)*(FFT_len + 2) * sizeof(float));
+	fftwf_complex *FFT_Ey; FFT_Ey = (fftwf_complex *)fftwf_malloc((N_FFTs/2)*(FFT_len + 2) * sizeof(float));
 
-		Ey_FFT_Out.open(OUT_PATH__ + FILE_NAME__ + "_Ey_" + (OutMode ? ".bin" : ".txt"), ios::out | ios::trunc | (OutMode ? (int)0 : ios::binary));
+//	fftw_plan_with_nthreads(thread::hardware_concurrency());			// Multi-threading 
+
+	const string Wisdom_PATH = "Wisdom" + '\\' + FILE_NAME__ + ".WISDOM";
+	fftw_import_wisdom_from_filename(Wisdom_PATH.c_str());				// Importing Wisdom
+																								//FFTW Advacned Interface  Todo: Save Wisdom !! Save Time
+	fftwf_plan plan_x = fftwf_plan_many_dft_r2c(1, &FFT_len, N_FFTs / 2, (float *)FFT_Ex, &FFT_len, 1, (FFT_len + 2), (fftwf_complex *)FFT_Ex, &FFT_len, 1, (FFT_len / 2 + 1), FFTW_PATIENT);
+	fftwf_plan plan_y = fftwf_plan_many_dft_r2c(1, &FFT_len, N_FFTs / 2, (float *)FFT_Ey, &FFT_len, 1, (FFT_len + 2), (fftwf_complex *)FFT_Ey, &FFT_len, 1, (FFT_len / 2 + 1), FFTW_PATIENT);
+
+	fftw_export_wisdom_to_filename(Wisdom_PATH.c_str());				// Exporting Wisdom
+
+	ofstream Ex_FFT_Out;
+	if (OutMode == ASCII) {
+		const int64_t Optm_Write_buff_size = Calc_Optm_ASCII_Writebuff_size((N_FFTs / 2)*(FFT_len + 2));
+
+		char *OutWrite_buff = (char *)malloc(Optm_Write_buff_size);
+		Ex_FFT_Out.rdbuf()->pubsetbuf(OutWrite_buff, Optm_Write_buff_size);
+	}
+	else					Ex_FFT_Out.rdbuf()->pubsetbuf(nullptr, 0);
+	Ex_FFT_Out.tie(NULL);
+
+	Ex_FFT_Out.open(OUT_PATH__ + FILE_NAME__ + "_Ex_" + (OutMode ? ".txt" : ".bin"), ios::out | ios::trunc | (OutMode ? (int)0 : ios::binary));
+	Ex_FFT_Out.seekp(ios::beg);
+
+
+	ofstream Ey_FFT_Out;
+	if (OutMode == ASCII) {
+		const int64_t Optm_Write_buff_size = Calc_Optm_ASCII_Writebuff_size((N_FFTs / 2)*(FFT_len + 2));
+
+		char *OutWrite_buff = (char *)malloc(Optm_Write_buff_size);
+		Ey_FFT_Out.rdbuf()->pubsetbuf(OutWrite_buff, Optm_Write_buff_size);
+	}
+	else					Ey_FFT_Out.rdbuf()->pubsetbuf(nullptr, 0);
+	Ey_FFT_Out.tie(NULL);
+
+		Ey_FFT_Out.open(OUT_PATH__ + FILE_NAME__ + "_Ey_" + (OutMode ? ".txt" : ".bin"), ios::out | ios::trunc | (OutMode ? (int)0 : ios::binary));
 		Ey_FFT_Out.seekp(ios::beg);
 
 		while (!DataIn.eof())
 		{	
 			int N_FFTs_loaded;
 
-			if(InpMode == ASCII)		N_FFTs_loaded = Read_Ascii_to_float((float *)FFT_Ex, (float *)FFT_Ey, DataIn, FFT_len, (N_FFTs / 2));
+			if(InpMode == ASCII)		N_FFTs_loaded = Read_Ascii_to_float((float *)FFT_Ex, (float *)FFT_Ey, DataIn, FFT_len, (N_FFTs / 2));	//No of FFT's Loaded into memory /Data Channel
 			else						N_FFTs_loaded = Read_Bin_to_float((float *)FFT_Ex, (float *)FFT_Ey, DataIn, FFT_len, (N_FFTs / 2));
 				
 				fftwf_execute(plan_x);
 				fftwf_execute(plan_y);
 
-				if (OutMode == ASCII)		for (int j = 0; j < N_FFTs_loaded * FFT_len/2 + 1; j++)			Ex_FFT_Out << FFT_Ex[j][0] << " " << FFT_Ex[j][1] << "\n";
-				else						Ex_FFT_Out.write((char*)FFT_Ex, N_FFTs_loaded * (2 * sizeof(float)*(FFT_len / 2 + 1)));
+				if (OutMode == ASCII)		for (int j = 0; j < N_FFTs_loaded * (FFT_len/2 + 1); j++)			Ex_FFT_Out << FFT_Ex[j][0] << " " << FFT_Ex[j][1] << "\n";
+				else																							Ex_FFT_Out.write((char*)FFT_Ex, N_FFTs_loaded * (sizeof(fftwf_complex)*(FFT_len / 2 + 1)));
 
-				if (OutMode == ASCII)		for (int j = 0; j < N_FFTs_loaded * FFT_len / 2 + 1; j++)			 Ey_FFT_Out << FFT_Ey[j][0] << " " << FFT_Ey[j][1] << "\n";
-				else						Ey_FFT_Out.write((char*)FFT_Ey, N_FFTs_loaded * (2 * sizeof(float)*(FFT_len / 2 + 1)));
+				if (OutMode == ASCII)		for (int j = 0; j < N_FFTs_loaded * (FFT_len/ 2 + 1); j++)		    Ey_FFT_Out << FFT_Ey[j][0] << " " << FFT_Ey[j][1] << "\n";
+				else																							Ey_FFT_Out.write((char*)FFT_Ey, N_FFTs_loaded * (sizeof(fftwf_complex)*(FFT_len / 2 + 1)));
 		}
 	
 	fftwf_destroy_plan(plan_x);
 	fftwf_destroy_plan(plan_y);
+
+//	fftw_cleanup_threads();				// Multi-threading
 
 	fftwf_free(FFT_Ex); fftwf_free(FFT_Ey);
 
@@ -234,101 +260,110 @@ void Roundto2p(int &N) {						// round(N) to closest power of 2
 
 }
 
-int Calc_Optm_BuffNum(const int64_t DataSize, const DataMode InpMode, const int64_t BuffSize, const int64_t MAX_TotSize) {							// TotSize = BuffNum*BuffSize;			// BuffSize, MAX_TotSize in bytes, 
+int Calc_Optm_FFTNum(const int64_t DataSize, const DataMode InpMode, const int64_t BuffSize, const int64_t MAX_TotSize) {							// TotSize = BuffNum*BuffSize;			// BuffSize, MAX_TotSize in bytes, 
 
-	const int factor = InpMode ? 1 : 4;					// ASCII, BIN File factor		// Todo: Improve, Make it More General
+	const int factor = InpMode ? 4 : 1;					// ASCII, BIN File factor		// Todo: Improve, Make it More General
 
 
-	if ((DataSize / factor) * (int64_t)sizeof(float) > MAX_TotSize)				return (int)MAX_TotSize / BuffSize;						// Todo: Allocate such that DataSize is close to an Intergral Multiple of TotSize (going to be allocated)
-	else																return (int)(DataSize / factor) / BuffSize;
+	if ((DataSize / factor) * (int64_t)sizeof(float) > MAX_TotSize)				return (int)(MAX_TotSize / BuffSize);						// Todo: Allocate such that DataSize is close to an Intergral Multiple of TotSize (going to be allocated)
+	else																return (int)((DataSize / factor) / BuffSize);
 
 }
-
+int64_t Calc_Optm_ASCII_Writebuff_size(const int N, const int64_t MAX_TotSize /* = 512 * 1024 * 1024 */ ) {
+	return min<int64_t>((int64_t)N * 8, MAX_TotSize);										// Assuming 1float requires 8 chars to store as ASCII
+}
 // File Tools
 
-int64_t getFile_Size(ifstream &File) {						// Return Size in bytes
+int64_t getFile_Size(const string &_FileName) {						// Return Size in bytes
 
-	streampos pos_ini = File.tellg();
+	struct _stat64 Fstat;			_stat64(_FileName.c_str(), &Fstat);
 
-	File.seekg(ios::beg);
-	streampos pos_beg = File.tellg();
-
-	File.seekg(ios::end);
-	streampos pos_end = File.tellg();
-
-	File.seekg(pos_ini);
-
-	return (int64_t)(pos_end - pos_beg);			//  Size in Bytes
+	return (int64_t)Fstat.st_size;			//  Size in Bytes
 }
 
 int Read_Ascii_to_float(float *Ex, float *Ey, ifstream &InpFile, const int Buff_len, const int Buff_num, const int64_t MAX_TotSize /* = 512 * 1024 * 1024 */) {
 
 	const int64_t Size = min<int64_t>(2 * Buff_len*Buff_num * 4, MAX_TotSize);							// Todo: Use Statistical Model to predice The Required Buffersize to Read
 
-	char *temp_Buff; temp_Buff = (char *)malloc(Size);								//Buffer
+	char * const temp_Buff = (char *)malloc(Size + 1);	temp_Buff[Size] = '\0';			//Buffer
 
-	int64_t i = 0;
+	register int  i = 0; 	register int  k = 0;
 
 	while ((i < Buff_len*Buff_num) && (!InpFile.eof())) {
 
 		InpFile.read(temp_Buff, min<int64_t>(2 * (Buff_len*Buff_num - i) * 4, Size));					// Reads predicted required amount of data, clamped by Max Buffer Size  **Improve with Statistical Model
 		streamsize ChRead_cnt = InpFile.gcount();
-		int64_t _parsed = 0;
+		
+/*		printf("Read  \t %d \n", ChRead_cnt);											// Debugging 
+		if (InpFile.eof()) printf("EndofFile  \t %d \n", ChRead_cnt);				*/
 
-		for (int j = 0; true; j++) {		// Checking for incomoplete Data, seekg(till previous complete value);
+		register char *_parsedptr = temp_Buff;											// Directly Dealing with Pointers rather than Count Variable for Optimisation
+		char * const _parsedend_ptr = temp_Buff + ChRead_cnt;
 
-			if ((temp_Buff[Size - 1 - j] == '\n') || (temp_Buff[Size - 1 - j] == ' ')) {
+		for (register int j = 0; true; j++) {		// Checking for incomplete Data, seekg(till previous complete value);
+
+			if ((temp_Buff[ChRead_cnt - 1 - j] == '\n') || (temp_Buff[ChRead_cnt - 1 - j] == ' ')) {
 				ChRead_cnt += -j;
-				InpFile.seekg(-j, ios::cur);
+				if(j > 0 )  InpFile.seekg(-j, ios::cur);
 				break;
 			}
 
-			temp_Buff[Size - 1 - j] = '\0';
+			temp_Buff[ChRead_cnt - 1 - j] = '\0';
 		}
+		
+		while ((i < Buff_len*Buff_num)&&(_parsedptr + 1 < _parsedend_ptr)) {
 
-		while (_parsed < ChRead_cnt) {
-
-			size_t k = 0;
-			Ex[i] = (float)stol(&temp_Buff[_parsed], &k);
-			_parsed += k;
-
-			Ey[i] = (float)stol(&temp_Buff[_parsed], &k);
-			_parsed += k;
+			Ex[i + 2*k] = (float)strtol(_parsedptr, &_parsedptr, 10);					// Using strtol for Optimisation purposes, NOTE: stol is very very slow when used with char*, as it meant to only deal with strings
+			Ey[i + 2*k] = (float)strtol(_parsedptr, &_parsedptr, 10);
 			i++;
 
-			if (i == Buff_len)		i += 2;
+			if (i%Buff_len == 0)		k++;
 		}
-	}
-	for (int j = 0; j < (i%Buff_len); j++)			 Ex[i] = Ey[i] = 0.0f;
 
-	return (i / 2 % Buff_len) ? (int)(i / 2 / Buff_len) : (int)(i / 2 / Buff_len) + 1;				// returns Number of Filled Arrays 
+		if ((_parsedptr + 1 < _parsedend_ptr))	InpFile.seekg(_parsedptr - _parsedend_ptr, ios::cur);				// Seekback to be able to reread the unparsed Data the next time
+	}
+	
+	if ((i%Buff_len) != 0) { 
+		for (; i < (k + 1)*Buff_len; i++)			 Ex[i + 2*k] = Ey[i + 2*k] = 0.0f;
+		k++; 
+	}
+
+	free(temp_Buff);
+	return k;				// returns Number of Filled Arrays 
 
 }
 int Read_Bin_to_float(float *Ex, float *Ey, ifstream &InpFile, const int Buff_len, const int Buff_num, const int64_t MAX_TotSize /* = 512 * 1024 * 1024 */) {			//Buff_num == (No of Buff_len Arrays to fill)/Channel				
 																																								// Todo: Add Multibyte int Read, float and double Read
 	const int64_t Size = min<int64_t>(2 * Buff_len*Buff_num * 1, MAX_TotSize);
 
-	char *temp_Buff; temp_Buff = (char *)malloc(Size);								//Buffer
+	register char *temp_Buff = (char *)malloc(Size);								//Buffer
 
-	int64_t N = 0;
+	register int i = 0;  register int k = 0;
 
-	while ((N < Buff_len*Buff_num) && (!InpFile.eof())) {
+	while ((i < Buff_len*Buff_num) && (!InpFile.eof())) {
 
-		InpFile.read(temp_Buff, min<int64_t>(2 * (Buff_len*Buff_num - N) * 1, Size));			// Reads only required amount of data, clamped by Max Buffer Size
-		int64_t k = InpFile.gcount();
+		InpFile.read(temp_Buff, min<int64_t>(2 * (Buff_len*Buff_num - i) * 1, Size));			// Reads only required amount of data, clamped by Max Buffer Size
+		streamsize ChRead_cnt = InpFile.gcount();
 
-		for (int j = 0; j < k / 2; j ++) {									// Converts and loads fft buffer accordingly (takes care of padding), Keeps track of number of read bytes so as to not convert more than then read & not write more than the data exists.
+		const int i_end = i + ChRead_cnt / 2;
 
-			Ex[N+j] = (float)temp_Buff[2 * (N+j)];
-			Ey[N+j] = (float)temp_Buff[2 * (N+j) + 1];
+		while (i < i_end) {									// Converts and loads fft buffer accordingly (takes care of padding), Keeps track of number of read bytes so as to not convert more than then read & not write more than the data exists.
 
-			if (j == Buff_len)		j += 2;
+			Ex[i + 2*k] = (float)temp_Buff[2*i];
+			Ey[i + 2*k] = (float)temp_Buff[2*i + 1];
+			i++;
+
+			if (i%Buff_len == 0)		k++;
 		}
-		N += k / 2;
 	}
-	for (int j = 0; j < ((N / 2) % Buff_len); j++)				Ex[N] = Ey[N] = 0.0f;
 
-	return (N / 2 % Buff_len) ? (int)(N / 2 / Buff_len) : (int)(N / 2 / Buff_len) + 1;				// returns Number of Filled Arrays 
+	if ((i%Buff_len) != 0) {
+		for (; i < (k + 1)*Buff_len; i++)			 Ex[i + 2 * k] = Ey[i + 2 * k] = 0.0f;
+		k++;
+	}
+
+	free(temp_Buff);
+	return k;				// returns Number of Filled Arrays 
 }
 
 // String Tools
@@ -352,29 +387,3 @@ bool StringToBool_overwrite_YesNo(string overwrite_YesNo) {
 	if (Validoverwrite_YesNo != -1)			return (Validoverwrite_YesNo != false);
 	else	printf("Error: StringToBool_overwrite_YesNo() couldn't convert to bool \n");
 }
-
-/*
-int PLot() {
-
-
-	mglData dat(30, 40); // data to for plotting 
-	for(long i=0;i<30;i++) for(long j=0;j<40;j++) dat.a[i+30*j] = 1/(1+(i-15)*(i-15)/225.+(j-20)*(j-20)/400.);
-
-	mglGraph gr; // class for plot drawing 
-	gr.Rotate(50,60); // rotate axis 
-	gr.Light(true); 
-
-	gr.Surf(dat); // plot surface Basically plot is d
-
-	return 0;
-
-
-
-	HMGL gr = mgl_create_graph(600, 400);
-	mgl_fplot(gr, "sin(pi*x)", "", ""); 
-	mgl_write_frame(gr, "test.png", ""); 
-	mgl_delete_graph(gr);
-
-	return 0;
-} 
-*/

@@ -93,6 +93,8 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>C:\Users\Sreevatsank\Documents\Visual Studio 2015\Projects\VelaPulsar_Spectrum\lib\mathgl-2.4.2-mingw.win64\bin;C:\Users\Sreevatsank\Documents\Visual Studio 2015\Projects\VelaPulsar_Spectrum\lib\fftw-3.3.5-dll64\bin;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libfftw3-3.lib;libfftw3f-3.lib;libfftw3l-3.lib;libmgl.lib;libmgl-qt5.lib;libmgl-wx.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -103,12 +105,13 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>false</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\Users\Sreevatsank\Documents\Visual Studio 2015\Projects\VelaPulsar_Spectrum\lib\mathgl-2.4.2-mingw.win64\lib;C:\Users\Sreevatsank\Documents\Visual Studio 2015\Projects\VelaPulsar_Spectrum\lib\fftw-3.3.5-dll64\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>libfftw3-3.lib;libfftw3f-3.lib;libfftw3l-3.lib;libmgl.lib;libmgl-qt5.lib;libmgl-wx.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>D:\New folder\Mathgl64\mgl_scripts-2.4.2.1.win64\mgl_scripts-2.4.2.1.win64;C:\Users\Sreevatsank\Documents\Visual Studio 2015\Projects\VelaPulsar_Spectrum\lib\fftw-3.3.5-dll64\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libfftw3-3.lib;libfftw3f-3.lib;libfftw3l-3.lib;libmgl.lib;libmgl-qt5.lib;libmgl-wx.lib;libmgl-wnd.lib;libmgl-qt.lib;libmgl-fltk.lib;libmgl-glut.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -143,7 +146,12 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>D:\New folder\Mathgl64\mgl_scripts-2.4.2.1.win64\mgl_scripts-2.4.2.1.win64;C:\Users\Sreevatsank\Documents\Visual Studio 2015\Projects\VelaPulsar_Spectrum\lib\fftw-3.3.5-dll64\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libfftw3-3.lib;libfftw3f-3.lib;libfftw3l-3.lib;libmgl.lib;libmgl-qt5.lib;libmgl-wx.lib;libmgl-wnd.lib;libmgl-qt.lib;libmgl-fltk.lib;libmgl-glut.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <ProjectReference>
+      <UseLibraryDependencyInputs>true</UseLibraryDependencyInputs>
+    </ProjectReference>
   </ItemDefinitionGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -156,7 +164,17 @@
     <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="VelaPulsar_Spectrum.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
+    <Import Project="..\packages\gsl-msvc-x64.2.4.0.8788\build\native\gsl-msvc-x64.targets" Condition="Exists('..\packages\gsl-msvc-x64.2.4.0.8788\build\native\gsl-msvc-x64.targets')" />
   </ImportGroup>
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\gsl-msvc-x64.2.4.0.8788\build\native\gsl-msvc-x64.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\gsl-msvc-x64.2.4.0.8788\build\native\gsl-msvc-x64.targets'))" />
+  </Target>
 </Project>
